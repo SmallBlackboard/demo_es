@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MY Blogs</title>
+    <script type="text/javascript" src="./js/vue.js"></script>
+    <script type="text/javascript" src="./js/axios.js"></script>
+    <script type="text/javascript" src="./js/marked.js"></script>
+    <link rel="stylesheet" href="./css/bootstrap.min.css"></link>
+    <link rel="stylesheet" href="./css/bootstrap-grid.min.css"></link>
+    <link rel="stylesheet" href="./css/bootstrap-reboot.min.css"></link>
+
+</head>
+<body>
+<div class="container">
+    <div class="row" style="meragin-top:20px">
+        <div class="clo-12">
+            <h2>SpringBoot+Mysql+elasticSearch</h2>
+        </div>
+    </div>
+
+
+    <div class="row" style="meragin-top:20px" id="app">
+        <div class="clo-9">
+            <form class="form-inline">
+                <div class="form-group mb-2">
+                    <input type="text" v-model="keyword" class="from-control" id="title-mysql" placeholder="请输入。。。" />
+                </div>
+                <button type="button" class="btn btn_primary mb-2" style="margin-left:5px;" v-on:click="searchForMysql" >mysql</button>
+                <button type="button" class="btn btn_primary mb-2" style="margin-left:5px;" v-on:click="searchForES" >ES</button>
+                <span style="margin-left:10px;color:red;">耗时：{{count}}</span>
+            </form>
+            <div class="row">
+                <div class="col-sm-6" v-for="(blog,index) in blogs" style="margin-top:20px;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{blog.content}}</h5>
+                            <p>{{blog.name}}喜欢{{blog.likeName}}发布于{{blog.updateTime}}</p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="clo-3">
+            <li>石生元</li>
+            <li>杨田田</li>
+        </div>
+    </div>
+</div>
+<script>
+    var app ;
+    app= new Vue({
+        el:"#app",
+        data:{
+            count:'',
+            blogs:[],
+            keyword:''
+        },
+        methods:{
+            findAll:function(){
+                var that = this;
+                axios.get("/getMysqlBlogs").then(function(response){
+                    that.blogs=response.data;
+                })
+            },
+            searchForMysql:function(){
+                var that = this;
+                axios.post("/search",{"type":"mysql","keyword":that.keyword}).then(function(response){
+                    that.blogs=response.data.list;
+                    that.count=response.data.total;
+                })
+            },
+            searchForES:function(){
+                var that = this;
+                axios.post("/search",{"type":"es","keyword":that.keyword}).then(function(response){
+                    that.blogs=response.data.list;
+                    that.count=response.data.total;
+                })
+            }
+        },
+        created:function(){
+            this.findAll();
+        }
+    })
+</script>
+
+</body>
+</html>
